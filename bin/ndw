@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_PATH="$(realpath "${BASH_SOURCE[0]}")"
+BIN_DIR="$(dirname "$SCRIPT_PATH")"
+ROOT_DIR="$(dirname "$BIN_DIR")"
+
+source "$ROOT_DIR/cli/lib/common.sh"
+
+echo "Nalfin Developer Workstation"
+echo "Version: $NDW_VERSION"
