@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run shellcheck
+        run: |
+          shellcheck bin/ndw
+          shellcheck bootstrap/install
+          shellcheck bootstrap/uninstall
+          shellcheck bootstrap/upgrade
+          shellcheck bootstrap/dotfiles
+          shellcheck cli/app.sh
+          shellcheck cli/router.sh
+          shellcheck cli/lib/*.sh
+          shellcheck cli/commands/*.sh
+
+  smoke:
+    name: Smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Make executable
+        run: chmod +x bin/ndw bootstrap/install
+
+      - name: Test --help
+        run: NDW_ROOT="$PWD" bash bin/ndw --help
+
+      - name: Test --version
+        run: NDW_ROOT="$PWD" bash bin/ndw --version
+
+      - name: Test unknown command exits non-zero
+        run: |
+          NDW_ROOT="$PWD" bash bin/ndw unknown_command && exit 1 || true
