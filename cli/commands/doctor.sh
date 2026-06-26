@@ -66,12 +66,26 @@ _check_tool() {
 }
 
 _check_ssh() {
-  # Detect any private key in ~/.ssh (exclude .pub, config, known_hosts)
-  local key
-  key="$(ls "$HOME/.ssh/" 2>/dev/null | grep -v '\.pub$' | grep -v 'known_hosts' | grep -v 'config' | grep -v '\.old$' | head -n1 || true)"
+  local ssh_dir="$HOME/.ssh"
 
-  if [[ -n "$key" ]]; then
-    output_success "$(printf '%-12s' "SSH key")  ${COLOR_DIM}~/.ssh/${key}${COLOR_RESET}"
+  if [[ ! -d "$ssh_dir" ]]; then
+    output_error "$(printf '%-12s' "SSH key")  Not found — run: ssh-keygen -t ed25519"
+    return 1
+  fi
+
+  local key
+  for f in "$ssh_dir"/*; do
+    [[ -f "$f" ]] || continue
+    [[ "$f" == *.pub ]] && continue
+    [[ "$(basename "$f")" == "known_hosts" ]] && continue
+    [[ "$(basename "$f")" == "known_hosts.old" ]] && continue
+    [[ "$(basename "$f")" == "config" ]] && continue
+    key="$f"
+    break
+  done
+
+  if [[ -n "${key:-}" ]]; then
+    output_success "$(printf '%-12s' "SSH key")  ${COLOR_DIM}${key}${COLOR_RESET}"
     return 0
   fi
 

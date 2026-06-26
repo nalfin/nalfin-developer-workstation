@@ -12,7 +12,6 @@ NDW_BACKUP_KEEP=5
 cmd_backup() {
   local cloud=false
 
-  # Parse flags
   for arg in "$@"; do
     case "$arg" in
       --cloud) cloud=true ;;
@@ -43,10 +42,8 @@ cmd_backup() {
 
   output_success "Backup created: $filepath ($size)"
 
-  # Keep only last N backups
   _backup_cleanup
 
-  # Upload to Google Drive if --cloud
   if [[ "$cloud" == true ]]; then
     _backup_upload "$filepath" "$filename"
   fi
@@ -55,12 +52,19 @@ cmd_backup() {
 }
 
 _backup_cleanup() {
-  local count
-  count="$(ls -1 "$NDW_BACKUP_DIR"/*.sql.gz 2>/dev/null | wc -l)"
+  local files=()
+  while IFS= read -r f; do
+    files+=("$f")
+  done < <(find "$NDW_BACKUP_DIR" -maxdepth 1 -name "*.sql.gz" -printf "%T@ %p\n" 2>/dev/null | sort -rn | awk '{print $2}')
+
+  local count="${#files[@]}"
 
   if [[ "$count" -gt "$NDW_BACKUP_KEEP" ]]; then
     output_info "Cleaning old backups (keeping last $NDW_BACKUP_KEEP)..."
-    ls -1t "$NDW_BACKUP_DIR"/*.sql.gz | tail -n +"$((NDW_BACKUP_KEEP + 1))" | xargs rm -f
+    local i
+    for ((i=NDW_BACKUP_KEEP; i<count; i++)); do
+      rm -f "${files[$i]}"
+    done
     output_success "Old backups removed"
   fi
 }
