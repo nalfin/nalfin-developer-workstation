@@ -31,7 +31,6 @@ cmd_doctor() {
 }
 
 _check_docker() {
-  # Capture all output including stdout (Docker Desktop prints warnings to stdout)
   local version
   version="$(docker version --format '{{.Client.Version}}' 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || true)"
 
@@ -40,7 +39,6 @@ _check_docker() {
     return 0
   fi
 
-  # Check if docker binary exists at all
   if command_exists "docker"; then
     output_warning "$(printf '%-12s' "Docker") Found but not connected — enable WSL integration in Docker Desktop"
     return 1
@@ -68,12 +66,14 @@ _check_tool() {
 }
 
 _check_ssh() {
-  for key in "$HOME/.ssh/id_ed25519" "$HOME/.ssh/id_rsa"; do
-    if [[ -f "$key" ]]; then
-      output_success "$(printf '%-12s' "SSH key")  ${COLOR_DIM}${key}${COLOR_RESET}"
-      return 0
-    fi
-  done
+  # Detect any private key in ~/.ssh (exclude .pub, config, known_hosts)
+  local key
+  key="$(ls "$HOME/.ssh/" 2>/dev/null | grep -v '\.pub$' | grep -v 'known_hosts' | grep -v 'config' | grep -v '\.old$' | head -n1 || true)"
+
+  if [[ -n "$key" ]]; then
+    output_success "$(printf '%-12s' "SSH key")  ${COLOR_DIM}~/.ssh/${key}${COLOR_RESET}"
+    return 0
+  fi
 
   output_error "$(printf '%-12s' "SSH key")  Not found — run: ssh-keygen -t ed25519"
   return 1
