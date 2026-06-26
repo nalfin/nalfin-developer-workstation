@@ -1,3 +1,4 @@
 # SC1091: Not following sourced files
-# We use dynamic paths via $NDW_ROOT so shellcheck can't follow them
 disable=SC1091
+# SC2016: Expressions in single quotes (intentional for echo examples)
+disable=SC2016
