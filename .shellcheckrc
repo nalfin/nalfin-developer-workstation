@@ -1,0 +1,3 @@
+# SC1091: Not following sourced files
+# We use dynamic paths via $NDW_ROOT so shellcheck can't follow them
+disable=SC1091
