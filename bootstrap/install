@@ -70,3 +70,7 @@ _done() {
 }
 
 main "$@"
+
+# Install dotfiles
+output_info "Installing dotfiles..."
+bash "$NDW_ROOT/bootstrap/dotfiles"

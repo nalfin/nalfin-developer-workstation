@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# =============================================================================
+# bootstrap/dotfiles — Install dotfiles via symlinks
+#
+# Usage:
+#   bash bootstrap/dotfiles
+# =============================================================================
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NDW_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+export NDW_ROOT
+
+source "$NDW_ROOT/cli/lib/output.sh"
+
+DOTFILES_DIR="$NDW_ROOT/dotfiles"
+
+main() {
+  output_header "NDW — Dotfiles"
+
+  _link "$DOTFILES_DIR/zshrc"     "$HOME/.zshrc"
+  _link "$DOTFILES_DIR/gitconfig" "$HOME/.gitconfig"
+  _link "$DOTFILES_DIR/p10k.zsh"  "$HOME/.p10k.zsh"
+
+  output_blank
+  output_success "Dotfiles installed!"
+  output_dim     "Reload shell: source ~/.zshrc"
+  output_blank
+}
+
+_link() {
+  local source="$1"
+  local target="$2"
+
+  # Backup existing file if it's not already a symlink
+  if [[ -f "$target" && ! -L "$target" ]]; then
+    mv "$target" "${target}.backup"
+    output_warning "Backed up: $target → ${target}.backup"
+  fi
+
+  # Remove stale symlink
+  [[ -L "$target" ]] && rm "$target"
+
+  ln -s "$source" "$target"
+  output_success "Linked: $target → $source"
+}
+
+main "$@"
