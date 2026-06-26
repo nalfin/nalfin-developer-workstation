@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# =============================================================================
+# bootstrap/upgrade — Pull latest changes and re-install
+# =============================================================================
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NDW_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+export NDW_ROOT
+
+source "$NDW_ROOT/cli/lib/output.sh"
+
+main() {
+  output_header "NDW — Upgrade"
+
+  output_info "Pulling latest changes..."
+  git -C "$NDW_ROOT" pull --ff-only
+
+  output_info "Re-installing..."
+  bash "$NDW_ROOT/bootstrap/install"
+}
+
+main "$@"

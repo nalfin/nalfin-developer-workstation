@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# =============================================================================
+# bootstrap/uninstall — Remove NDW from this workstation
+# =============================================================================
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NDW_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+export NDW_ROOT
+
+source "$NDW_ROOT/cli/lib/output.sh"
+
+INSTALL_SYMLINK="$HOME/.local/bin/ndw"
+
+main() {
+  output_header "NDW — Uninstall"
+
+  if [[ -L "$INSTALL_SYMLINK" ]]; then
+    rm "$INSTALL_SYMLINK"
+    output_success "Removed: $INSTALL_SYMLINK"
+  else
+    output_warning "Symlink not found — already removed?"
+  fi
+
+  output_blank
+  output_dim "Config at ~/.config/ndw/ was not removed."
+  output_blank
+}
+
+main "$@"

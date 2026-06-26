@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# =============================================================================
+# bin/ndw — NDW CLI entry point
+# Thin as possible: resolve root, export it, delegate to app.sh
+# =============================================================================
+set -euo pipefail
+
+NDW_BIN="$(readlink -f "${BASH_SOURCE[0]}")"
+NDW_ROOT="$(cd "$(dirname "$NDW_BIN")/.." && pwd)"
+
+export NDW_ROOT
+
+source "$NDW_ROOT/cli/app.sh"
+
+main "$@"
