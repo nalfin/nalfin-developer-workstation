@@ -74,3 +74,10 @@ main "$@"
 # Install dotfiles
 output_info "Installing dotfiles..."
 bash "$NDW_ROOT/bootstrap/dotfiles"
+
+# Remind user to run setup if needed
+if ! command -v zsh &>/dev/null || ! command -v node &>/dev/null; then
+  output_blank
+  output_warning "Some tools are missing."
+  output_info    "Run 'bash bootstrap/setup' to install all required tools."
+fi

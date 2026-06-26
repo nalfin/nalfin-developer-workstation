@@ -1,0 +1,277 @@
+#!/usr/bin/env bash
+# =============================================================================
+# bootstrap/setup — Install all tools for a fresh WSL/macOS workstation
+#
+# Usage:
+#   bash bootstrap/setup
+# =============================================================================
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NDW_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+export NDW_ROOT
+
+source "$NDW_ROOT/cli/lib/output.sh"
+source "$NDW_ROOT/cli/lib/common.sh"
+
+main() {
+  output_header "NDW — Setup"
+  output_dim "This will install all required tools for your workstation."
+  output_blank
+
+  if is_wsl || is_linux; then
+    _setup_linux
+  elif is_macos; then
+    _setup_macos
+  else
+    output_error "Unsupported OS"
+    exit 1
+  fi
+
+  output_blank
+  output_success "Setup complete! Run: ndw doctor"
+  output_blank
+}
+
+# =============================================================================
+# Linux / WSL
+# =============================================================================
+_setup_linux() {
+  _step_system_update
+  _step_zsh
+  _step_ohmyzsh
+  _step_zsh_plugins
+  _step_cli_tools
+  _step_zoxide
+  _step_lazygit
+  _step_node
+  _step_pnpm
+  _step_python
+  _step_uv
+  _step_php
+  _step_composer
+  _step_rclone
+  _step_folders
+}
+
+_step_system_update() {
+  output_header "System Update"
+  sudo apt update -y && sudo apt upgrade -y
+  sudo apt install -y curl wget git unzip
+  output_success "System updated"
+}
+
+_step_zsh() {
+  output_header "Zsh"
+  if command_exists "zsh"; then
+    output_success "Zsh already installed — $(zsh --version)"
+    return
+  fi
+  sudo apt install -y zsh
+  chsh -s "$(which zsh)"
+  output_success "Zsh installed"
+}
+
+_step_ohmyzsh() {
+  output_header "Oh My Zsh"
+  if [[ -d "$HOME/.oh-my-zsh" ]]; then
+    output_success "Oh My Zsh already installed"
+    return
+  fi
+  RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  output_success "Oh My Zsh installed"
+}
+
+_step_zsh_plugins() {
+  output_header "Zsh Plugins"
+  local custom="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+
+  # Powerlevel10k
+  if [[ ! -d "$custom/themes/powerlevel10k" ]]; then
+    output_info "Installing Powerlevel10k..."
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
+      "$custom/themes/powerlevel10k"
+  else
+    output_success "Powerlevel10k already installed"
+  fi
+
+  # zsh-autosuggestions
+  if [[ ! -d "$custom/plugins/zsh-autosuggestions" ]]; then
+    output_info "Installing zsh-autosuggestions..."
+    git clone https://github.com/zsh-users/zsh-autosuggestions \
+      "$custom/plugins/zsh-autosuggestions"
+  else
+    output_success "zsh-autosuggestions already installed"
+  fi
+
+  # zsh-syntax-highlighting
+  if [[ ! -d "$custom/plugins/zsh-syntax-highlighting" ]]; then
+    output_info "Installing zsh-syntax-highlighting..."
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting \
+      "$custom/plugins/zsh-syntax-highlighting"
+  else
+    output_success "zsh-syntax-highlighting already installed"
+  fi
+}
+
+_step_cli_tools() {
+  output_header "CLI Tools"
+
+  # eza
+  if ! command_exists "eza"; then
+    output_info "Installing eza..."
+    sudo apt install -y eza
+  else
+    output_success "eza already installed"
+  fi
+
+  # bat
+  if ! command_exists "batcat" && ! command_exists "bat"; then
+    output_info "Installing bat..."
+    sudo apt install -y bat
+  else
+    output_success "bat already installed"
+  fi
+
+  # ripgrep
+  if ! command_exists "rg"; then
+    output_info "Installing ripgrep..."
+    sudo apt install -y ripgrep
+  else
+    output_success "ripgrep already installed"
+  fi
+
+  # fd
+  if ! command_exists "fdfind"; then
+    output_info "Installing fd..."
+    sudo apt install -y fd-find
+  else
+    output_success "fd already installed"
+  fi
+}
+
+_step_zoxide() {
+  output_header "Zoxide"
+  if command_exists "zoxide"; then
+    output_success "Zoxide already installed"
+    return
+  fi
+  curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+  output_success "Zoxide installed"
+}
+
+_step_lazygit() {
+  output_header "Lazygit"
+  if command_exists "lazygit"; then
+    output_success "Lazygit already installed"
+    return
+  fi
+  output_info "Installing lazygit..."
+  local version
+  version=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+  curl -Lo /tmp/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${version}_Linux_x86_64.tar.gz"
+  tar xf /tmp/lazygit.tar.gz -C /tmp lazygit
+  sudo install /tmp/lazygit /usr/local/bin
+  rm /tmp/lazygit.tar.gz /tmp/lazygit
+  output_success "Lazygit installed"
+}
+
+_step_node() {
+  output_header "Node.js"
+  if command_exists "node"; then
+    output_success "Node.js already installed — $(node --version)"
+    return
+  fi
+  output_info "Installing Node.js LTS..."
+  curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+  sudo apt install -y nodejs
+  output_success "Node.js installed"
+}
+
+_step_pnpm() {
+  output_header "pnpm"
+  if command_exists "pnpm"; then
+    output_success "pnpm already installed — $(pnpm --version)"
+    return
+  fi
+  output_info "Installing pnpm..."
+  npm install -g pnpm
+  output_success "pnpm installed"
+}
+
+_step_python() {
+  output_header "Python"
+  if command_exists "python3"; then
+    output_success "Python already installed — $(python3 --version)"
+    return
+  fi
+  sudo apt install -y python3 python3-pip
+  output_success "Python installed"
+}
+
+_step_uv() {
+  output_header "uv"
+  if command_exists "uv"; then
+    output_success "uv already installed — $(uv --version)"
+    return
+  fi
+  output_info "Installing uv..."
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  output_success "uv installed"
+}
+
+_step_php() {
+  output_header "PHP"
+  if command_exists "php"; then
+    output_success "PHP already installed — $(php --version | head -n1)"
+    return
+  fi
+  output_info "Installing PHP..."
+  sudo apt install -y php php-cli php-mbstring php-xml php-curl
+  output_success "PHP installed"
+}
+
+_step_composer() {
+  output_header "Composer"
+  if command_exists "composer"; then
+    output_success "Composer already installed — $(composer --version)"
+    return
+  fi
+  output_info "Installing Composer..."
+  curl -sS https://getcomposer.org/installer | php
+  sudo mv composer.phar /usr/local/bin/composer
+  chmod +x /usr/local/bin/composer
+  output_success "Composer installed"
+}
+
+_step_rclone() {
+  output_header "Rclone"
+  if command_exists "rclone"; then
+    output_success "Rclone already installed — $(rclone version | head -n1)"
+    return
+  fi
+  output_info "Installing rclone..."
+  curl https://rclone.org/install.sh | sudo bash
+  output_success "Rclone installed"
+  output_blank
+  output_warning "Google Drive not configured yet."
+  output_info    "Run: rclone config"
+  output_dim     "Follow the guide in docs/SETUP.md"
+}
+
+_step_folders() {
+  output_header "Workspace Folders"
+  mkdir -p ~/dev/{platform,personal,clients,playground}
+  mkdir -p ~/dev/evocave
+  output_success "Folders ready"
+}
+
+# =============================================================================
+# macOS (future)
+# =============================================================================
+_setup_macos() {
+  output_warning "macOS setup coming soon."
+  output_info    "For now, follow docs/SETUP.md manually."
+}
+
+main "$@"
