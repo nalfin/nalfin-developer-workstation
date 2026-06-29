@@ -17,7 +17,10 @@ DOTFILES_DIR="$NDW_ROOT/dotfiles"
 
 main() {
   output_header "NDW — Dotfiles"
+  _install_dotfiles
+}
 
+_install_dotfiles() {
   _link "$DOTFILES_DIR/zshrc"     "$HOME/.zshrc"
   _link "$DOTFILES_DIR/gitconfig" "$HOME/.gitconfig"
   _link "$DOTFILES_DIR/p10k.zsh"  "$HOME/.p10k.zsh"
@@ -32,13 +35,11 @@ _link() {
   local source="$1"
   local target="$2"
 
-  # Backup existing file if it's not already a symlink
   if [[ -f "$target" && ! -L "$target" ]]; then
     mv "$target" "${target}.backup"
     output_warning "Backed up: $target → ${target}.backup"
   fi
 
-  # Remove stale symlink
   [[ -L "$target" ]] && rm "$target"
 
   ln -s "$source" "$target"

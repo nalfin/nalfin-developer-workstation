@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# =============================================================================
+# bootstrap/generate-env — Generate infra/.env from config/services.yaml
+# =============================================================================
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NDW_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+export NDW_ROOT
+
+source "$NDW_ROOT/cli/lib/output.sh"
+source "$NDW_ROOT/cli/lib/common.sh"
+source "$NDW_ROOT/cli/lib/yaml.sh"
+
+SERVICES_YAML="$NDW_ROOT/config/services.yaml"
+ENV_FILE="$NDW_ROOT/infra/.env"
+
+main() {
+  output_header "NDW — Generate ENV"
+
+  output_info "Reading config/services.yaml..."
+
+  local pg_user pg_port redis_port adminer_port mailpit_smtp mailpit_ui
+
+  pg_user="$(yaml_get "$SERVICES_YAML" "postgres.user")"
+  pg_port="$(yaml_get "$SERVICES_YAML" "postgres.port")"
+  redis_port="$(yaml_get "$SERVICES_YAML" "redis.port")"
+  adminer_port="$(yaml_get "$SERVICES_YAML" "adminer.port")"
+  mailpit_smtp="$(yaml_get "$SERVICES_YAML" "mailpit.smtp_port")"
+  mailpit_ui="$(yaml_get "$SERVICES_YAML" "mailpit.ui_port")"
+
+  output_info "Generating infra/.env..."
+
+  cat > "$ENV_FILE" << ENVEOF
+# =============================================================================
+# infra/.env — Generated from config/services.yaml
+# Do not edit manually — run: bash bootstrap/generate-env
+# =============================================================================
+
+# PostgreSQL
+POSTGRES_USER=${pg_user}
+POSTGRES_PASSWORD=secret
+POSTGRES_PORT=${pg_port}
+
+# Redis
+REDIS_PORT=${redis_port}
+
+# Adminer
+ADMINER_PORT=${adminer_port}
+
+# Mailpit
+MAILPIT_SMTP_PORT=${mailpit_smtp}
+MAILPIT_UI_PORT=${mailpit_ui}
+ENVEOF
+
+  output_success "Generated: $ENV_FILE"
+  output_blank
+}
+
+main "$@"

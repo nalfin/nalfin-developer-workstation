@@ -7,6 +7,7 @@ set -euo pipefail
 source "$NDW_ROOT/cli/lib/output.sh"
 source "$NDW_ROOT/cli/lib/config.sh"
 source "$NDW_ROOT/cli/lib/common.sh"
+source "$NDW_ROOT/cli/lib/yaml.sh"
 
 source "$NDW_ROOT/cli/router.sh"
 

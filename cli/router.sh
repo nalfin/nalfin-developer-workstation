@@ -18,6 +18,10 @@ router() {
       source "$NDW_ROOT/cli/commands/version.sh"
       cmd_version "$@"
       ;;
+    bootstrap)
+      source "$NDW_ROOT/cli/commands/bootstrap.sh"
+      cmd_bootstrap "$@"
+      ;;
     doctor)
       source "$NDW_ROOT/cli/commands/doctor.sh"
       cmd_doctor "$@"

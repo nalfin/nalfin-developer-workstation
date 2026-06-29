@@ -11,6 +11,7 @@ cmd_help() {
   output_blank
 
   echo -e "  ${COLOR_BOLD}Commands:${COLOR_RESET}"
+  echo -e "    ${COLOR_CYAN}bootstrap${COLOR_RESET}  Setup workstation from config"
   echo -e "    ${COLOR_CYAN}doctor${COLOR_RESET}     Check environment health"
   echo -e "    ${COLOR_CYAN}db${COLOR_RESET}         Manage development databases"
   echo -e "    ${COLOR_CYAN}work${COLOR_RESET}       Start / stop workspace"

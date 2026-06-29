@@ -1,0 +1,10 @@
+# =============================================================================
+# config/workspace.yaml — Workspace folder structure
+# =============================================================================
+
+folders:
+  - ~/dev/platform
+  - ~/dev/personal
+  - ~/dev/clients
+  - ~/dev/playground
+  - ~/dev/evocave
