@@ -33,9 +33,6 @@ main() {
   output_blank
 }
 
-# =============================================================================
-# Linux / WSL
-# =============================================================================
 _setup_linux() {
   _step_system_update
   _step_zsh
@@ -57,7 +54,7 @@ _setup_linux() {
 _step_system_update() {
   output_header "System Update"
   sudo apt update -y && sudo apt upgrade -y
-  sudo apt install -y curl wget git unzip
+  sudo apt install -y curl wget git zip unzip
   output_success "System updated"
 }
 
@@ -86,7 +83,6 @@ _step_zsh_plugins() {
   output_header "Zsh Plugins"
   local custom="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 
-  # Powerlevel10k
   if [[ ! -d "$custom/themes/powerlevel10k" ]]; then
     output_info "Installing Powerlevel10k..."
     git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
@@ -95,7 +91,6 @@ _step_zsh_plugins() {
     output_success "Powerlevel10k already installed"
   fi
 
-  # zsh-autosuggestions
   if [[ ! -d "$custom/plugins/zsh-autosuggestions" ]]; then
     output_info "Installing zsh-autosuggestions..."
     git clone https://github.com/zsh-users/zsh-autosuggestions \
@@ -104,7 +99,6 @@ _step_zsh_plugins() {
     output_success "zsh-autosuggestions already installed"
   fi
 
-  # zsh-syntax-highlighting
   if [[ ! -d "$custom/plugins/zsh-syntax-highlighting" ]]; then
     output_info "Installing zsh-syntax-highlighting..."
     git clone https://github.com/zsh-users/zsh-syntax-highlighting \
@@ -117,7 +111,6 @@ _step_zsh_plugins() {
 _step_cli_tools() {
   output_header "CLI Tools"
 
-  # eza
   if ! command_exists "eza"; then
     output_info "Installing eza..."
     sudo apt install -y eza
@@ -125,7 +118,6 @@ _step_cli_tools() {
     output_success "eza already installed"
   fi
 
-  # bat
   if ! command_exists "batcat" && ! command_exists "bat"; then
     output_info "Installing bat..."
     sudo apt install -y bat
@@ -133,7 +125,6 @@ _step_cli_tools() {
     output_success "bat already installed"
   fi
 
-  # ripgrep
   if ! command_exists "rg"; then
     output_info "Installing ripgrep..."
     sudo apt install -y ripgrep
@@ -141,7 +132,6 @@ _step_cli_tools() {
     output_success "ripgrep already installed"
   fi
 
-  # fd
   if ! command_exists "fdfind"; then
     output_info "Installing fd..."
     sudo apt install -y fd-find
@@ -251,12 +241,12 @@ _step_rclone() {
     return
   fi
   output_info "Installing rclone..."
+  sudo apt install -y unzip
   curl https://rclone.org/install.sh | sudo bash
   output_success "Rclone installed"
   output_blank
   output_warning "Google Drive not configured yet."
   output_info    "Run: rclone config"
-  output_dim     "Follow the guide in docs/SETUP.md"
 }
 
 _step_folders() {
@@ -266,12 +256,9 @@ _step_folders() {
   output_success "Folders ready"
 }
 
-# =============================================================================
-# macOS (future)
-# =============================================================================
 _setup_macos() {
   output_warning "macOS setup coming soon."
-  output_info    "For now, follow docs/SETUP.md manually."
+  output_info    "For now, follow README.md manually."
 }
 
 main "$@"

@@ -3,20 +3,29 @@
 # cli/commands/backup.sh — ndw backup
 # Export all PostgreSQL databases to a compressed SQL file
 # Optionally upload to Google Drive
+# Optionally backup SSH keys (encrypted)
 # =============================================================================
 
 NDW_BACKUP_DIR="$HOME/backup/ndw"
 NDW_GDRIVE_DIR="gdrive:NDW/backups"
+NDW_GDRIVE_SSH_DIR="gdrive:NDW/ssh"
 NDW_BACKUP_KEEP=5
 
 cmd_backup() {
   local cloud=false
+  local ssh=false
 
   for arg in "$@"; do
     case "$arg" in
       --cloud) cloud=true ;;
+      --ssh)   ssh=true ;;
     esac
   done
+
+  if [[ "$ssh" == true ]]; then
+    _backup_ssh
+    return
+  fi
 
   output_header "Backup"
 
@@ -83,4 +92,58 @@ _backup_upload() {
   rclone copy "$filepath" "$NDW_GDRIVE_DIR/" --progress
 
   output_success "Uploaded: $NDW_GDRIVE_DIR/$filename"
+}
+
+_backup_ssh() {
+  output_header "Backup SSH Keys"
+
+  if ! command_exists "rclone"; then
+    output_error "rclone not found"
+    output_info  "Install rclone: curl https://rclone.org/install.sh | sudo bash"
+    exit 1
+  fi
+
+  if [[ ! -d "$HOME/.ssh" ]]; then
+    output_error "No .ssh directory found"
+    exit 1
+  fi
+
+  local timestamp
+  timestamp="$(date +%Y-%m-%d_%H-%M-%S)"
+
+  local filename="ssh_${timestamp}.zip"
+  local filepath="$NDW_BACKUP_DIR/$filename"
+
+  mkdir -p "$NDW_BACKUP_DIR"
+
+  output_info "Enter encryption password for SSH backup:"
+  echo -n "  Password: "
+  read -rs password
+  echo ""
+  echo -n "  Confirm:  "
+  read -rs password2
+  echo ""
+
+  if [[ "$password" != "$password2" ]]; then
+    output_error "Passwords do not match"
+    exit 1
+  fi
+
+  output_info "Encrypting SSH keys..."
+  zip -P "$password" -r "$filepath" "$HOME/.ssh/" &>/dev/null
+
+  local size
+  size="$(du -h "$filepath" | cut -f1)"
+
+  output_success "Encrypted: $filepath ($size)"
+
+  output_info "Uploading to Google Drive..."
+  rclone copy "$filepath" "$NDW_GDRIVE_SSH_DIR/" --progress
+
+  rm -f "$filepath"
+
+  output_blank
+  output_success "SSH keys backed up to Google Drive: $NDW_GDRIVE_SSH_DIR/$filename"
+  output_warning "Remember your encryption password — it cannot be recovered!"
+  output_blank
 }
