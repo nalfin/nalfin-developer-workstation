@@ -84,7 +84,7 @@ _done() {
   output_blank
   output_success "NDW installed! Run: ndw --help"
   output_dim     "New device? Run 'ndw restore --ssh' first if you haven't."
-  output_dim     "Want Node/PHP/Python/etc too? Run 'bash bootstrap/setup' (optional)."
+  output_dim     "Want Node/PHP/Python/etc too? Run 'ndw setup' (optional, works from anywhere)."
   output_blank
 }
 

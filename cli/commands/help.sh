@@ -15,6 +15,9 @@ cmd_help() {
   echo -e "    ${COLOR_CYAN}doctor${COLOR_RESET}          Check environment health"
   echo -e "    ${COLOR_CYAN}backup --ssh${COLOR_RESET}    Backup SSH keys to Google Drive (encrypted)"
   echo -e "    ${COLOR_CYAN}restore --ssh${COLOR_RESET}   Restore SSH keys from Google Drive"
+  echo -e "    ${COLOR_CYAN}setup${COLOR_RESET}           Install optional tools (Node/PHP/Python/Warp/VS Code/etc)"
+  echo -e "    ${COLOR_CYAN}upgrade${COLOR_RESET}         Update NDW to the latest version"
+  echo -e "    ${COLOR_CYAN}uninstall${COLOR_RESET}       Remove NDW"
   output_blank
 
   echo -e "  ${COLOR_BOLD}Global options:${COLOR_RESET}"
@@ -23,6 +26,6 @@ cmd_help() {
   output_blank
 
   output_dim "New device? bash bootstrap/install  →  ndw restore --ssh  →  ndw bootstrap"
-  output_dim "Want Node/PHP/Python too? bash bootstrap/setup (optional)"
+  output_dim "Want Node/PHP/Python/Warp/VS Code too? ndw setup (optional)"
   output_blank
 }

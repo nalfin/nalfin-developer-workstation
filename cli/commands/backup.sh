@@ -39,10 +39,13 @@ _backup_ssh() {
   local timestamp
   timestamp="$(date +%Y-%m-%d_%H-%M-%S)"
 
-  local filename="ssh_${timestamp}.zip"
+  local filename="ssh_${timestamp}.tar.enc"
   local filepath="$NDW_BACKUP_DIR/$filename"
 
   mkdir -p "$NDW_BACKUP_DIR"
+
+  require_command "tar" "should be preinstalled — Git Bash / macOS both ship it"
+  require_command "openssl" "should be preinstalled — Git Bash / macOS both ship it"
 
   output_info "Enter encryption password for SSH backup:"
   echo -n "  Password: "
@@ -58,7 +61,9 @@ _backup_ssh() {
   fi
 
   output_info "Encrypting SSH keys..."
-  (cd "$HOME" && zip -P "$password" -r "$filepath" .ssh/) &>/dev/null
+  export NDW_BACKUP_PW="$password"
+  (cd "$HOME" && tar -czf - .ssh/) | openssl enc -aes-256-cbc -pbkdf2 -salt -pass env:NDW_BACKUP_PW -out "$filepath"
+  unset NDW_BACKUP_PW password password2
 
   local size
   size="$(du -h "$filepath" | cut -f1)"

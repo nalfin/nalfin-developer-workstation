@@ -34,6 +34,15 @@ router() {
       source "$NDW_ROOT/cli/commands/restore.sh"
       cmd_restore "$@"
       ;;
+    setup)
+      exec bash "$NDW_ROOT/bootstrap/setup" "$@"
+      ;;
+    upgrade)
+      exec bash "$NDW_ROOT/bootstrap/upgrade" "$@"
+      ;;
+    uninstall)
+      exec bash "$NDW_ROOT/bootstrap/uninstall" "$@"
+      ;;
     *)
       output_error "Unknown command: '$command'"
       output_info  "Run 'ndw --help' to see available commands."

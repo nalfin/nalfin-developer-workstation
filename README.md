@@ -104,7 +104,7 @@ ndw doctor
 Node.js, PHP, Python, dll bukan bagian wajib NDW — install kalau/kapan dibutuhkan:
 
 ```bash
-bash bootstrap/setup
+ndw setup
 ```
 
 Ini nanya lewat menu, mau install apa (Node, PHP, Python, atau semua).
@@ -129,7 +129,7 @@ Ini nanya lewat menu, mau install apa (Node, PHP, Python, atau semua).
 | `config/workspace.yaml` | Folder struktur workspace |
 | `dotfiles/gitconfig` | Git configuration |
 | `dotfiles/aliases.sh` | Shell aliases (bash + zsh, sourced dari `.bashrc`/`.zshrc`) |
-| `dotfiles/starship.toml` | Prompt (Starship — install manual lewat `bootstrap/setup`) |
+| `dotfiles/starship.toml` | Prompt (Starship — install manual lewat `ndw setup`) |
 
 ### Multiple Git identities (Personal vs Evocave)
 
@@ -152,9 +152,9 @@ EOF
 |---|---|
 | `curl ... quickstart.sh \| bash` | One-line install on a brand new device (clones repo + `bootstrap/install`) |
 | `bash bootstrap/install` | Install NDW CLI + dotfiles (wajib, sekali per device) |
-| `bash bootstrap/setup` | Install tools opsional (Node, PHP, Python, Warp, VS Code, dll) |
-| `bash bootstrap/upgrade` | Update NDW ke versi terbaru |
-| `bash bootstrap/uninstall` | Hapus NDW |
+| `ndw setup` | Install tools opsional (Node, PHP, Python, Warp, VS Code, dll) — bisa dipanggil dari mana aja |
+| `ndw upgrade` | Update NDW ke versi terbaru — bisa dipanggil dari mana aja |
+| `ndw uninstall` | Hapus NDW — bisa dipanggil dari mana aja |
 
 ---
 

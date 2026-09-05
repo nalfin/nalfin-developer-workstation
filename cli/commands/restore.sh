@@ -37,7 +37,7 @@ _restore_ssh() {
   local files=()
   while IFS= read -r line; do
     files+=("$line")
-  done < <(rclone lsf "$NDW_GDRIVE_SSH_DIR" --include "*.zip" | sort -r)
+  done < <(rclone lsf "$NDW_GDRIVE_SSH_DIR" --include "*.zip" --include "*.tar.enc" | sort -r)
 
   if [[ ${#files[@]} -eq 0 ]]; then
     output_error "No SSH backups found in Google Drive"
@@ -75,7 +75,18 @@ _restore_ssh() {
 
   output_info "Extracting SSH keys..."
   mkdir -p "$HOME/.ssh"
-  unzip -P "$password" -o "$localpath" -d "$HOME" &>/dev/null
+
+  if [[ "$selected" == *.tar.enc ]]; then
+    require_command "openssl" "should be preinstalled — Git Bash / macOS both ship it"
+    export NDW_BACKUP_PW="$password"
+    openssl enc -d -aes-256-cbc -pbkdf2 -salt -pass env:NDW_BACKUP_PW -in "$localpath" | tar -C "$HOME" -xzf -
+    unset NDW_BACKUP_PW
+  else
+    # Legacy .zip backups (made before NDW switched to tar+openssl)
+    require_command "unzip" "https://gnuwin32.sourceforge.net/packages/unzip.htm"
+    unzip -P "$password" -o "$localpath" -d "$HOME" &>/dev/null
+  fi
+  unset password
 
   chmod 700 "$HOME/.ssh"
   chmod 600 "$HOME/.ssh"/* 2>/dev/null || true

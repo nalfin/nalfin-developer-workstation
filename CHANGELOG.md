@@ -16,6 +16,8 @@ Format: [Semantic Versioning](https://semver.org)
 - `bootstrap/setup` rewritten from an apt-only installer into an optional, interactive menu using `winget` (Windows) or `brew` (macOS).
 - Added `is_windows()` detection in `cli/lib/common.sh`.
 - Symlink steps (`ln -s`) now fall back to a copy/wrapper script if symlinks aren't permitted (e.g. Windows without Developer Mode).
+- Added `ndw setup`, `ndw upgrade`, `ndw uninstall` — forward to the matching `bootstrap/*` script so they work from any directory, not just inside the repo.
+- `backup --ssh` / `restore --ssh` switched from `zip -P` (weak ZipCrypto, and `zip` isn't preinstalled on Git Bash) to `tar` + `openssl enc -aes-256-cbc -pbkdf2` — no extra tools needed on Windows/macOS, and stronger encryption. New backups are `.tar.enc`; `restore --ssh` still reads old `.zip` backups for compatibility.
 
 ## [0.1.0] — Phase 1: Foundation
 
