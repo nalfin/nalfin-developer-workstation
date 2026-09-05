@@ -5,9 +5,23 @@
 No WSL, no Docker, no local databases — projects connect straight to Supabase/Upstash.
 Works the same way on Windows (Git Bash) and macOS (Terminal).
 
+> ⚠️ **Repo ini public.** Jangan pernah commit SSH keys, `.env`, token, atau credential apa pun ke sini — itu semua tempatnya di `~/.ssh` (backup terenkripsi ke Google Drive lewat `ndw backup --ssh`), bukan di git.
+
 ---
 
 ## Quick Start (PC/Mac Baru)
+
+### Option A: One-line install (fastest)
+
+Cukup install **Git** dulu (satu-satunya prasyarat manual — Windows: [Git for Windows](https://git-scm.com/download/win), macOS: `xcode-select --install`), lalu buka Git Bash/Terminal dan jalankan:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/nalfin/nalfin-developer-workstation/main/quickstart.sh | bash
+```
+
+Ini otomatis clone repo + install NDW. Lanjut ke [step 4](#4-restore-ssh-keys) di bawah.
+
+### Option B: Manual, step by step
 
 ### 1. Install prerequisites
 
@@ -30,8 +44,6 @@ git clone https://github.com/nalfin/nalfin-developer-workstation.git \
 
 cd ~/dev/platform/nalfin-developer-workstation
 ```
-
-> First time on this device and no SSH key yet? Clone via HTTPS as above — you'll switch to the SSH remote after `ndw restore --ssh` below.
 
 ### 3. Install NDW
 
@@ -119,14 +131,28 @@ Ini nanya lewat menu, mau install apa (Node, PHP, Python, atau semua).
 | `dotfiles/aliases.sh` | Shell aliases (bash + zsh, sourced dari `.bashrc`/`.zshrc`) |
 | `dotfiles/starship.toml` | Prompt (Starship — install manual lewat `bootstrap/setup`) |
 
+### Multiple Git identities (Personal vs Evocave)
+
+`dotfiles/gitconfig` pakai `[includeIf "gitdir:~/dev/evocave/"]` — otomatis switch identitas kalau kamu lagi di folder `~/dev/evocave/`. Karena repo ini **public**, email Evocave kamu **tidak** ditaruh di sini. Buat sekali secara manual di device masing-masing (file ini nggak pernah masuk git):
+
+```bash
+cat > ~/.gitconfig-evocave << 'EOF'
+[user]
+    email = your-evocave-email@example.com
+EOF
+```
+
+`ndw doctor` bakal ngingetin kalau file ini belum ada.
+
 ---
 
 ## Bootstrap Scripts
 
 | Script | Description |
 |---|---|
+| `curl ... quickstart.sh \| bash` | One-line install on a brand new device (clones repo + `bootstrap/install`) |
 | `bash bootstrap/install` | Install NDW CLI + dotfiles (wajib, sekali per device) |
-| `bash bootstrap/setup` | Install tools opsional (Node, PHP, Python, dll) |
+| `bash bootstrap/setup` | Install tools opsional (Node, PHP, Python, Warp, VS Code, dll) |
 | `bash bootstrap/upgrade` | Update NDW ke versi terbaru |
 | `bash bootstrap/uninstall` | Hapus NDW |
 

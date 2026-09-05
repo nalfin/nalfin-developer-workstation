@@ -28,6 +28,15 @@ main() {
   fi
 
   output_dim "Detected: $(os_label)"
+  echo -n "  Is this correct? [Y/n] "
+  read -r os_confirm
+  os_confirm="${os_confirm:-Y}"
+  if [[ ! "$os_confirm" =~ ^[Yy]$ ]]; then
+    output_error "Aborted. This script only knows how to install for Windows/macOS."
+    output_info  "If detection is wrong, please open an issue — this shouldn't happen."
+    exit 1
+  fi
+
   output_blank
 
   _menu
@@ -40,7 +49,8 @@ _menu() {
     "Node.js (+ pnpm)"
     "PHP + Composer"
     "Python + uv"
-    "Starship (prompt) + lazygit + rclone"
+    "CLI extras (Starship, lazygit, rclone, eza, bat, ripgrep, fd)"
+    "GUI apps (Warp, VS Code, 7-Zip)"
     "Everything above"
     "Skip"
   )
@@ -51,8 +61,9 @@ _menu() {
       2) _install_php; break ;;
       3) _install_python; break ;;
       4) _install_extras; break ;;
-      5) _install_node; _install_php; _install_python; _install_extras; break ;;
-      6) output_info "Skipped."; break ;;
+      5) _install_gui_apps; break ;;
+      6) _install_node; _install_php; _install_python; _install_extras; _install_gui_apps; break ;;
+      7) output_info "Skipped."; break ;;
       *) echo "  Invalid choice, try again." ;;
     esac
   done
@@ -143,10 +154,38 @@ _install_python() {
 }
 
 _install_extras() {
-  output_header "Starship, lazygit, rclone"
+  output_header "Starship, lazygit, rclone, eza, bat, ripgrep, fd"
   _pkg "Starship" "starship" "Starship.Starship" "starship"
   _pkg "lazygit"  "lazygit"  "JesseDuffield.lazygit" "lazygit"
   _pkg "rclone"   "rclone"   "Rclone.Rclone" "rclone"
+  _pkg "eza"      "eza"      "eza-community.eza" "eza"
+  _pkg "bat"      "bat"      "sharkdp.bat" "bat"
+  _pkg "ripgrep"  "rg"       "BurntSushi.ripgrep.MSVC" "ripgrep"
+  _pkg "fd"       "fd"       "sharkdp.fd" "fd"
+}
+
+_install_gui_apps() {
+  output_header "Warp, VS Code, 7-Zip"
+
+  if is_windows; then
+    require_command "winget" "Install 'App Installer' from the Microsoft Store first"
+    winget install --silent --accept-package-agreements --accept-source-agreements -e --id Warp.Warp \
+      || output_dim "Warp: already installed, or install failed — check manually"
+    winget install --silent --accept-package-agreements --accept-source-agreements -e --id Microsoft.VisualStudioCode \
+      || output_dim "VS Code: already installed, or install failed — check manually"
+    winget install --silent --accept-package-agreements --accept-source-agreements -e --id 7zip.7zip \
+      || output_dim "7-Zip: already installed, or install failed — check manually"
+  elif is_macos; then
+    require_command "brew" "Install Homebrew first: https://brew.sh"
+    brew install --cask warp \
+      || output_dim "Warp: already installed, or install failed — check manually"
+    brew install --cask visual-studio-code \
+      || output_dim "VS Code: already installed, or install failed — check manually"
+    brew install sevenzip \
+      || output_dim "7-Zip: already installed, or install failed — check manually"
+  fi
+
+  output_success "GUI apps done (check above for any that failed)"
 }
 
 main "$@"

@@ -18,6 +18,7 @@ cmd_doctor() {
   _check_tool "Composer"  "composer"  "--version"  "https://getcomposer.org" || has_error=1
   _check_tool "rclone"    "rclone"    "version"    "https://rclone.org/install" || has_error=1
   _check_ssh                                                            || has_error=1
+  _check_evocave_identity
 
   output_blank
 
@@ -73,6 +74,19 @@ _check_tool() {
   else
     output_error "$(printf '%-12s' "$label") Not found — $hint"
     return 1
+  fi
+}
+
+_check_evocave_identity() {
+  if [[ -f "$HOME/.gitconfig-evocave" ]]; then
+    output_success "$(printf '%-12s' "Evocave git")  ${COLOR_DIM}~/.gitconfig-evocave found${COLOR_RESET}"
+  else
+    output_warning "$(printf '%-12s' "Evocave git")  ~/.gitconfig-evocave not found"
+    output_dim     "             Commits in ~/dev/evocave/ will silently use your default identity."
+    output_dim     "             Create it: cat > ~/.gitconfig-evocave << 'EOF'"
+    output_dim     "                        [user]"
+    output_dim     "                            email = your-evocave-email@example.com"
+    output_dim     "                        EOF"
   fi
 }
 

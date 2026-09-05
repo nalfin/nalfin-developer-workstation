@@ -1,5 +1,22 @@
 [user]
 	name = Nalfin
-	email = nalfin.id@gmail.com
+	# Using GitHub's noreply email since this repo is public.
+	# Verify your exact address at: https://github.com/settings/emails
+	# (format: <id>+<username>@users.noreply.github.com, or just
+	# <username>@users.noreply.github.com if "Keep my email addresses
+	# private" is enabled there)
+	email = nalfin@users.noreply.github.com
 [init]
 	defaultBranch = main
+
+# Evocave repos use a different identity/email. That's set in
+# ~/.gitconfig-evocave, which lives OUTSIDE this repo (never committed —
+# this repo is public, that file is not). Create it once yourself:
+#
+#   cat > ~/.gitconfig-evocave << 'EOF'
+#   [user]
+#       email = your-evocave-email@example.com
+#   EOF
+#
+[includeIf "gitdir:~/dev/evocave/"]
+	path = ~/.gitconfig-evocave
