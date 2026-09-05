@@ -11,7 +11,7 @@ cmd_doctor() {
 
   _check_tool "Git"       "git"       "--version"  "$(_hint_git)"       || has_error=1
   _check_tool "Node.js"   "node"      "--version"  "$(_hint_node)"      || has_error=1
-  _check_tool "pnpm"      "pnpm"      "--version"  "npm install -g pnpm" || has_error=1
+  _check_tool "pnpm"      "pnpm"      "--version"  "corepack prepare pnpm@latest --activate" || has_error=1
   _check_tool "Python"    "python3"   "--version"  "$(_hint_python)"    || has_error=1
   _check_tool "uv"        "uv"        "--version"  "https://github.com/astral-sh/uv" || has_error=1
   _check_tool "PHP"       "php"       "--version"  "$(_hint_php)"       || has_error=1
@@ -82,7 +82,7 @@ _check_evocave_identity() {
     output_success "$(printf '%-12s' "Evocave git")  ${COLOR_DIM}~/.gitconfig-evocave found${COLOR_RESET}"
   else
     output_warning "$(printf '%-12s' "Evocave git")  ~/.gitconfig-evocave not found"
-    output_dim     "             Commits in ~/dev/evocave/ will silently use your default identity."
+    output_dim     "             Commits in ~/dev/projects/evocave/ will silently use your default identity."
     output_dim     "             Create it: cat > ~/.gitconfig-evocave << 'EOF'"
     output_dim     "                        [user]"
     output_dim     "                            email = your-evocave-email@example.com"

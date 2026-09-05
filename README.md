@@ -133,7 +133,7 @@ Ini nanya lewat menu, mau install apa (Node, PHP, Python, atau semua).
 
 ### Multiple Git identities (Personal vs Evocave)
 
-`dotfiles/gitconfig` pakai `[includeIf "gitdir:~/dev/evocave/"]` — otomatis switch identitas kalau kamu lagi di folder `~/dev/evocave/`. Karena repo ini **public**, email Evocave kamu **tidak** ditaruh di sini. Buat sekali secara manual di device masing-masing (file ini nggak pernah masuk git):
+`dotfiles/gitconfig` pakai `[includeIf "gitdir:~/dev/projects/evocave/"]` — otomatis switch identitas kalau kamu lagi di folder `~/dev/projects/evocave/`. Karena repo ini **public**, email Evocave kamu **tidak** ditaruh di sini. Buat sekali secara manual di device masing-masing (file ini nggak pernah masuk git):
 
 ```bash
 cat > ~/.gitconfig-evocave << 'EOF'

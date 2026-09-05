@@ -18,5 +18,5 @@
 #       email = your-evocave-email@example.com
 #   EOF
 #
-[includeIf "gitdir:~/dev/evocave/"]
+[includeIf "gitdir:~/dev/projects/evocave/"]
 	path = ~/.gitconfig-evocave

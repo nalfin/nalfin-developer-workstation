@@ -16,7 +16,7 @@ alias cl='clear'
 # Navigation
 # ---------------------------------------------------------------------------
 alias dev='cd ~/dev'
-alias ev='cd ~/dev/evocave'
+alias ev='cd ~/dev/projects/evocave'
 alias per='cd ~/dev/personal'
 alias clients='cd ~/dev/clients'
 alias playground='cd ~/dev/playground'
@@ -24,20 +24,20 @@ alias playground='cd ~/dev/playground'
 # ---------------------------------------------------------------------------
 # Evocave
 # ---------------------------------------------------------------------------
-alias cd_api='cd ~/dev/evocave/evocave-api'
-alias cd_dash='cd ~/dev/evocave/evocave-dash'
-alias cd_help='cd ~/dev/evocave/evocave-help'
-alias cd_docs='cd ~/dev/evocave/evocave-docs'
+alias cd_api='cd ~/dev/projects/evocave/evocave-api'
+alias cd_dash='cd ~/dev/projects/evocave/evocave-dash'
+alias cd_help='cd ~/dev/projects/evocave/evocave-help'
+alias cd_docs='cd ~/dev/projects/evocave/evocave-docs'
 
-alias nd-api='cd ~/dev/evocave/evocave-api && pnpm dev'
-alias nd-dash='cd ~/dev/evocave/evocave-dash && pnpm dev -- -p 3001'
-alias nd-help='cd ~/dev/evocave/evocave-help && pnpm dev -- -p 3002'
-alias nd-docs='cd ~/dev/evocave/evocave-docs && pnpm dev -- -p 3003'
+alias nd-api='cd ~/dev/projects/evocave/evocave-api && pnpm dev'
+alias nd-dash='cd ~/dev/projects/evocave/evocave-dash && pnpm dev -- -p 3001'
+alias nd-help='cd ~/dev/projects/evocave/evocave-help && pnpm dev -- -p 3002'
+alias nd-docs='cd ~/dev/projects/evocave/evocave-docs && pnpm dev -- -p 3003'
 
-alias nb-api='cd ~/dev/evocave/evocave-api && pnpm build'
-alias nb-dash='cd ~/dev/evocave/evocave-dash && pnpm build'
-alias nb-help='cd ~/dev/evocave/evocave-help && pnpm build'
-alias nb-docs='cd ~/dev/evocave/evocave-docs && pnpm build'
+alias nb-api='cd ~/dev/projects/evocave/evocave-api && pnpm build'
+alias nb-dash='cd ~/dev/projects/evocave/evocave-dash && pnpm build'
+alias nb-help='cd ~/dev/projects/evocave/evocave-help && pnpm build'
+alias nb-docs='cd ~/dev/projects/evocave/evocave-docs && pnpm build'
 
 # ---------------------------------------------------------------------------
 # Node / pnpm

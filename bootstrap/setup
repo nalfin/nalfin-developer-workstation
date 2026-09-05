@@ -100,8 +100,9 @@ _install_node() {
   output_header "Node.js"
   _pkg "Node.js" "node" "OpenJS.NodeJS.LTS" "node"
   if ! command_exists "pnpm"; then
-    output_info "Installing pnpm..."
-    npm install -g pnpm
+    output_info "Installing pnpm via Corepack (bundled with Node.js)..."
+    corepack enable
+    corepack prepare pnpm@latest --activate
     output_success "pnpm installed"
   else
     output_success "pnpm already installed"
