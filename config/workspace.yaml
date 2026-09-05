@@ -5,6 +5,5 @@
 folders:
   - ~/dev/platform
   - ~/dev/personal
-  - ~/dev/clients
-  - ~/dev/playground
-  - ~/dev/evocave
+  - ~/dev/playgrounds
+  - ~/dev/projects
