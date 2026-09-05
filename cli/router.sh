@@ -26,14 +26,6 @@ router() {
       source "$NDW_ROOT/cli/commands/doctor.sh"
       cmd_doctor "$@"
       ;;
-    db)
-      source "$NDW_ROOT/cli/commands/db.sh"
-      cmd_db "$@"
-      ;;
-    work)
-      source "$NDW_ROOT/cli/commands/work.sh"
-      cmd_work "$@"
-      ;;
     backup)
       source "$NDW_ROOT/cli/commands/backup.sh"
       cmd_backup "$@"

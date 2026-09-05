@@ -21,13 +21,15 @@ require_command() {
 }
 
 # OS detection
-is_wsl()   { [[ -f /proc/version ]] && grep -qi "microsoft" /proc/version; }
-is_macos() { [[ "$(uname -s)" == "Darwin" ]]; }
-is_linux() { [[ "$(uname -s)" == "Linux" ]]; }
+is_wsl()     { [[ -f /proc/version ]] && grep -qi "microsoft" /proc/version; }
+is_windows() { [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]] || [[ "${OS:-}" == "Windows_NT" ]]; }
+is_macos()   { [[ "$(uname -s)" == "Darwin" ]]; }
+is_linux()   { [[ "$(uname -s)" == "Linux" ]]; }
 
 # Human-readable OS label
 os_label() {
-  if is_wsl;     then echo "WSL2 (Windows)"
+  if is_windows; then echo "Windows (Git Bash)"
+  elif is_wsl;     then echo "WSL2 (Windows)"
   elif is_macos; then echo "macOS"
   elif is_linux; then echo "Linux"
   else echo "Unknown"

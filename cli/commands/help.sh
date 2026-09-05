@@ -7,16 +7,14 @@ cmd_help() {
   output_header "NDW — Nalfin Developer Workstation v${NDW_VERSION}"
 
   echo -e "  ${COLOR_BOLD}Usage:${COLOR_RESET}"
-  echo -e "    ndw <command> [subcommand] [options]"
+  echo -e "    ndw <command> [options]"
   output_blank
 
   echo -e "  ${COLOR_BOLD}Commands:${COLOR_RESET}"
-  echo -e "    ${COLOR_CYAN}bootstrap${COLOR_RESET}  Setup workstation from config"
-  echo -e "    ${COLOR_CYAN}doctor${COLOR_RESET}     Check environment health"
-  echo -e "    ${COLOR_CYAN}db${COLOR_RESET}         Manage development databases"
-  echo -e "    ${COLOR_CYAN}work${COLOR_RESET}       Start / stop workspace"
-  echo -e "    ${COLOR_CYAN}backup${COLOR_RESET}     Backup databases"
-  echo -e "    ${COLOR_CYAN}restore${COLOR_RESET}    Restore databases"
+  echo -e "    ${COLOR_CYAN}bootstrap${COLOR_RESET}       Restore workspace folders + dotfiles"
+  echo -e "    ${COLOR_CYAN}doctor${COLOR_RESET}          Check environment health"
+  echo -e "    ${COLOR_CYAN}backup --ssh${COLOR_RESET}    Backup SSH keys to Google Drive (encrypted)"
+  echo -e "    ${COLOR_CYAN}restore --ssh${COLOR_RESET}   Restore SSH keys from Google Drive"
   output_blank
 
   echo -e "  ${COLOR_BOLD}Global options:${COLOR_RESET}"
@@ -24,6 +22,7 @@ cmd_help() {
   echo -e "    ${COLOR_CYAN}--version, -v${COLOR_RESET}    Show version"
   output_blank
 
-  output_dim "Run 'ndw <command> --help' for command-specific help."
+  output_dim "New device? bash bootstrap/install  →  ndw restore --ssh  →  ndw bootstrap"
+  output_dim "Want Node/PHP/Python too? bash bootstrap/setup (optional)"
   output_blank
 }

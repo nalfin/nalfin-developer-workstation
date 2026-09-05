@@ -9,20 +9,21 @@ cmd_doctor() {
 
   local has_error=0
 
-  _check_docker                                                                          || has_error=1
-  _check_tool "Git"       "git"       "--version"  "sudo apt install git"               || has_error=1
-  _check_tool "Node.js"   "node"      "--version"  "https://nodejs.org"                 || has_error=1
-  _check_tool "pnpm"      "pnpm"      "--version"  "npm install -g pnpm"                || has_error=1
-  _check_tool "Python"    "python3"   "--version"  "sudo apt install python3"           || has_error=1
-  _check_tool "uv"        "uv"        "--version"  "https://github.com/astral-sh/uv"   || has_error=1
-  _check_tool "PHP"       "php"       "--version"  "sudo apt install php"               || has_error=1
-  _check_tool "Composer"  "composer"  "--version"  "https://getcomposer.org"            || has_error=1
-  _check_ssh                                                                             || has_error=1
+  _check_tool "Git"       "git"       "--version"  "$(_hint_git)"       || has_error=1
+  _check_tool "Node.js"   "node"      "--version"  "$(_hint_node)"      || has_error=1
+  _check_tool "pnpm"      "pnpm"      "--version"  "npm install -g pnpm" || has_error=1
+  _check_tool "Python"    "python3"   "--version"  "$(_hint_python)"    || has_error=1
+  _check_tool "uv"        "uv"        "--version"  "https://github.com/astral-sh/uv" || has_error=1
+  _check_tool "PHP"       "php"       "--version"  "$(_hint_php)"       || has_error=1
+  _check_tool "Composer"  "composer"  "--version"  "https://getcomposer.org" || has_error=1
+  _check_tool "rclone"    "rclone"    "version"    "https://rclone.org/install" || has_error=1
+  _check_ssh                                                            || has_error=1
 
   output_blank
 
   if [[ $has_error -eq 1 ]]; then
     output_warning "Some checks failed. See above for details."
+    output_dim     "Run 'bash bootstrap/setup' to install missing tools."
   else
     output_success "All checks passed."
   fi
@@ -30,22 +31,32 @@ cmd_doctor() {
   output_blank
 }
 
-_check_docker() {
-  local version
-  version="$(docker version --format '{{.Client.Version}}' 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || true)"
-
-  if [[ -n "$version" ]]; then
-    output_success "$(printf '%-12s' "Docker") ${COLOR_DIM}${version}${COLOR_RESET}"
-    return 0
+_hint_git() {
+  if is_windows; then echo "winget install Git.Git"
+  elif is_macos; then echo "brew install git"
+  else echo "sudo apt install git"
   fi
+}
 
-  if command_exists "docker"; then
-    output_warning "$(printf '%-12s' "Docker") Found but not connected — enable WSL integration in Docker Desktop"
-    return 1
+_hint_node() {
+  if is_windows; then echo "winget install OpenJS.NodeJS.LTS"
+  elif is_macos; then echo "brew install node"
+  else echo "https://nodejs.org"
   fi
+}
 
-  output_error "$(printf '%-12s' "Docker") Not found — https://docs.docker.com/get-docker"
-  return 1
+_hint_python() {
+  if is_windows; then echo "winget install Python.Python.3"
+  elif is_macos; then echo "brew install python3"
+  else echo "sudo apt install python3"
+  fi
+}
+
+_hint_php() {
+  if is_windows; then echo "winget install PHP.PHP"
+  elif is_macos; then echo "brew install php"
+  else echo "sudo apt install php"
+  fi
 }
 
 _check_tool() {
@@ -69,7 +80,7 @@ _check_ssh() {
   local ssh_dir="$HOME/.ssh"
 
   if [[ ! -d "$ssh_dir" ]]; then
-    output_error "$(printf '%-12s' "SSH key")  Not found — run: ssh-keygen -t ed25519"
+    output_error "$(printf '%-12s' "SSH key")  Not found — run: ndw restore --ssh"
     return 1
   fi
 
@@ -89,6 +100,6 @@ _check_ssh() {
     return 0
   fi
 
-  output_error "$(printf '%-12s' "SSH key")  Not found — run: ssh-keygen -t ed25519"
+  output_error "$(printf '%-12s' "SSH key")  Not found — run: ndw restore --ssh"
   return 1
 }

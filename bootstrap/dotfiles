@@ -12,6 +12,7 @@ NDW_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 export NDW_ROOT
 
 source "$NDW_ROOT/cli/lib/output.sh"
+source "$NDW_ROOT/cli/lib/common.sh"
 
 DOTFILES_DIR="$NDW_ROOT/dotfiles"
 
@@ -21,19 +22,46 @@ main() {
 }
 
 _install_dotfiles() {
-  _link "$DOTFILES_DIR/zshrc"     "$HOME/.zshrc"
-  _link "$DOTFILES_DIR/gitconfig" "$HOME/.gitconfig"
-  _link "$DOTFILES_DIR/p10k.zsh"  "$HOME/.p10k.zsh"
+  _link "$DOTFILES_DIR/gitconfig"     "$HOME/.gitconfig"
+  _link "$DOTFILES_DIR/aliases.sh"    "$HOME/.ndw_aliases"
+  _link "$DOTFILES_DIR/starship.toml" "$HOME/.config/starship.toml"
+
+  _wire_shell_rc "$HOME/.bashrc"
+  is_macos && _wire_shell_rc "$HOME/.zshrc"
 
   output_blank
   output_success "Dotfiles installed!"
-  output_dim     "Reload shell: source ~/.zshrc"
+  output_dim     "Reload shell: source ~/.bashrc  (or open a new Warp tab)"
   output_blank
+}
+
+_wire_shell_rc() {
+  local rc="$1"
+  local shell_name
+  shell_name="$(basename "$rc" | sed 's/^\.//')"  # bashrc / zshrc
+
+  mkdir -p "$(dirname "$rc")"
+  touch "$rc"
+
+  if grep -qF ".ndw_aliases" "$rc" 2>/dev/null; then
+    output_success "Already wired: $rc"
+    return
+  fi
+
+  {
+    echo ""
+    echo "# Added by NDW"
+    echo '[[ -f "$HOME/.ndw_aliases" ]] && source "$HOME/.ndw_aliases"'
+    echo "command -v starship >/dev/null 2>&1 && eval \"\$(starship init ${shell_name%rc})\""
+  } >> "$rc"
+  output_success "Wired: $rc → sources ~/.ndw_aliases + starship (if installed)"
 }
 
 _link() {
   local source="$1"
   local target="$2"
+
+  mkdir -p "$(dirname "$target")"
 
   if [[ -f "$target" && ! -L "$target" ]]; then
     mv "$target" "${target}.backup"
@@ -42,8 +70,13 @@ _link() {
 
   [[ -L "$target" ]] && rm "$target"
 
-  ln -s "$source" "$target"
-  output_success "Linked: $target → $source"
+  if ln -s "$source" "$target" 2>/dev/null; then
+    output_success "Linked: $target → $source"
+  else
+    cp "$source" "$target"
+    output_warning "Copied (symlink failed): $target"
+    output_dim     "Enable Developer Mode on Windows for real symlinks (Settings → For developers)."
+  fi
 }
 
 main "$@"

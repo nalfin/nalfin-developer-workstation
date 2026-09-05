@@ -1,0 +1,49 @@
+# =============================================================================
+# dotfiles/starship.toml — Prompt config (Starship)
+# Install: https://starship.rs  |  Docs: https://starship.rs/config
+# Symlinked to ~/.config/starship.toml by `ndw bootstrap`
+# =============================================================================
+
+format = """
+$directory\
+$git_branch\
+$git_status\
+$nodejs\
+$php\
+$python\
+$cmd_duration
+$character"""
+
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+style = "bold cyan"
+
+[git_branch]
+symbol = " "
+style = "bold purple"
+format = "on [$symbol$branch]($style) "
+
+[git_status]
+style = "bold red"
+format = "([$all_status$ahead_behind]($style)) "
+
+[nodejs]
+symbol = " "
+format = "via [$symbol$version]($style) "
+
+[php]
+symbol = " "
+format = "via [$symbol$version]($style) "
+
+[python]
+symbol = " "
+format = "via [$symbol$version]($style) "
+
+[cmd_duration]
+min_time = 2000
+format = "took [$duration]($style) "
+
+[character]
+success_symbol = "[➜](bold green)"
+error_symbol = "[➜](bold red)"

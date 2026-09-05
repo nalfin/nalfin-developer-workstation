@@ -1,44 +1,54 @@
 # NDW — Nalfin Developer Workstation
 
-> Developer Workstation as Code. Clone, bootstrap, done.
+> Restore your dev identity (SSH keys + dotfiles) on any new device. Clone, run one script, done.
+
+No WSL, no Docker, no local databases — projects connect straight to Supabase/Upstash.
+Works the same way on Windows (Git Bash) and macOS (Terminal).
 
 ---
 
-## Quick Start (PC Baru)
+## Quick Start (PC/Mac Baru)
 
-### 1. Windows — Persiapan Awal
+### 1. Install prerequisites
 
-**Install WSL2:**
-```powershell
-wsl --install
-wsl --set-default-version 2
-wsl --install -d Ubuntu
-```
+**Windows:**
+- [Git for Windows](https://git-scm.com/download/win) — this gives you Git Bash, which is what runs everything below.
+- [Warp](https://www.warp.dev/windows-terminal) — recommended terminal.
 
-**Install:**
-- [Docker Desktop](https://www.docker.com/products/docker-desktop) → Settings → Resources → WSL Integration → Enable Ubuntu
-- [VS Code](https://code.visualstudio.com) → Install extension **WSL** by Microsoft
+**macOS:**
+- Xcode Command Line Tools: `xcode-select --install`
+- [Warp](https://www.warp.dev) — recommended terminal.
 
----
+### 2. Clone this repo
 
-### 2. VS Code — Connect ke WSL
-
-1. Klik icon **><** di pojok kiri bawah VS Code
-2. Pilih **Connect to WSL**
-3. Terminal → New Terminal (otomatis masuk WSL)
-4. Set default terminal: `Ctrl+Shift+P` → "Terminal: Select Default Profile" → pilih "WSL"
-
----
-
-### 3. WSL — Setup SSH Keys
-
-SSH keys perlu di-restore dari Google Drive sebelum bisa clone repo.
+Open **Git Bash** (Windows) or **Terminal** (macOS) — or open **Warp**, which runs the same shell underneath:
 
 ```bash
-# Install rclone dulu
-curl https://rclone.org/install.sh | sudo bash
+mkdir -p ~/dev/platform
+git clone https://github.com/nalfin/nalfin-developer-workstation.git \
+  ~/dev/platform/nalfin-developer-workstation
 
-# Setup Google Drive
+cd ~/dev/platform/nalfin-developer-workstation
+```
+
+> First time on this device and no SSH key yet? Clone via HTTPS as above — you'll switch to the SSH remote after `ndw restore --ssh` below.
+
+### 3. Install NDW
+
+```bash
+bash bootstrap/install
+```
+
+This restores your dotfiles (`gitconfig`, aliases, Starship prompt) and installs the `ndw` command.
+
+### 4. Restore SSH keys
+
+SSH keys are restored from Google Drive (encrypted zip), via `rclone`.
+
+```bash
+# First time only: install rclone, then connect it to your Google Drive
+# Windows: winget install Rclone.Rclone
+# macOS:   brew install rclone
 rclone config
 ```
 
@@ -46,86 +56,46 @@ Setup rclone:
 1. `n` → New remote → name: `gdrive`
 2. Pilih nomor **Google Drive**
 3. Scope: `1` → Auto config: `n`
-4. Copy URL ke browser Windows → login Google
+4. Copy URL ke browser → login Google
 5. Paste token ke terminal
 
-Setelah rclone terhubung, restore SSH keys:
+Then:
 
 ```bash
-# Buat folder sementara
-mkdir -p ~/backup/ndw
-
-# Download SSH backup dari Google Drive
-rclone copy gdrive:NDW/ssh/ ~/backup/ndw/ --include "*.zip"
-
-# Lihat file yang tersedia
-ls ~/backup/ndw/*.zip
-
-# Extract (masukkan password enkripsi saat diminta)
-unzip -P <password> ~/backup/ndw/ssh_*.zip -d /
-
-# Set permission
-chmod 700 ~/.ssh
-chmod 600 ~/.ssh/id_*
-chmod 644 ~/.ssh/*.pub
-chmod 600 ~/.ssh/config
+ndw restore --ssh
 ```
 
 Test koneksi:
 
 ```bash
-ssh -T git@github-nalfin          # GitHub nalfin
-ssh -T git@github-evocavedigital  # GitHub evocave
+ssh -T git@github.com
 ```
 
----
-
-### 4. WSL — Clone & Setup
-
-```bash
-# Clone repository
-mkdir -p ~/dev/platform
-git clone git@github-nalfin:nalfin/nalfin-developer-workstation.git \
-  ~/dev/platform/nalfin-developer-workstation
-
-cd ~/dev/platform/nalfin-developer-workstation
-
-# Install semua tools (Node.js, PHP, Python, zsh, dll)
-bash bootstrap/setup
-
-# Install NDW CLI + dotfiles
-bash bootstrap/install
-source ~/.zshrc
-```
-
----
-
-### 5. Bootstrap Workstation
+### 5. Bootstrap workspace
 
 ```bash
 ndw bootstrap
 ```
 
-Ini akan otomatis:
-- Buat folder workspace (`~/dev/...`)
-- Generate `infra/.env` dari `config/services.yaml`
-- Buat databases dari `config/services.yaml`
-- Install dotfiles symlinks
+Ini akan:
+- Buat folder workspace (`~/dev/...`) dari `config/workspace.yaml`
+- Install dotfiles symlinks (gitconfig, aliases, Starship)
 
----
-
-### 6. Verifikasi & Start
+### 6. Verifikasi
 
 ```bash
-# Cek environment
 ndw doctor
-
-# Start semua services
-ndw work start
-
-# Restore database dari Google Drive
-ndw restore --cloud
 ```
+
+### 7. (Opsional) Install tools
+
+Node.js, PHP, Python, dll bukan bagian wajib NDW — install kalau/kapan dibutuhkan:
+
+```bash
+bash bootstrap/setup
+```
+
+Ini nanya lewat menu, mau install apa (Node, PHP, Python, atau semua).
 
 ---
 
@@ -133,35 +103,10 @@ ndw restore --cloud
 
 | Command | Description |
 |---|---|
-| `ndw bootstrap` | Setup workstation dari config |
+| `ndw bootstrap` | Buat workspace folders + install dotfiles |
 | `ndw doctor` | Cek environment health |
-| `ndw work start` | Start semua services |
-| `ndw work stop` | Stop semua services |
-| `ndw work status` | Lihat status services |
-| `ndw db up` | Start infrastructure |
-| `ndw db down` | Stop infrastructure |
-| `ndw db status` | Lihat status containers |
-| `ndw db logs` | Lihat logs |
-| `ndw db shell` | Masuk PostgreSQL shell |
-| `ndw db create <name>` | Buat database baru |
-| `ndw db list` | List semua databases |
-| `ndw backup` | Backup database lokal |
-| `ndw backup --cloud` | Backup + upload Google Drive |
 | `ndw backup --ssh` | Backup SSH keys ke Google Drive (encrypted) |
-| `ndw restore` | Restore dari lokal |
-| `ndw restore --cloud` | Restore database dari Google Drive |
 | `ndw restore --ssh` | Restore SSH keys dari Google Drive |
-
----
-
-## Services
-
-| Service | URL |
-|---|---|
-| PostgreSQL | `localhost:5432` |
-| Redis | `localhost:6379` |
-| Adminer | http://localhost:8080 |
-| Mailpit | http://localhost:8025 |
 
 ---
 
@@ -170,10 +115,9 @@ ndw restore --cloud
 | File | Description |
 |---|---|
 | `config/workspace.yaml` | Folder struktur workspace |
-| `config/services.yaml` | PostgreSQL, Redis, ports, databases |
-| `dotfiles/zshrc` | Zsh configuration |
 | `dotfiles/gitconfig` | Git configuration |
-| `dotfiles/p10k.zsh` | Powerlevel10k theme |
+| `dotfiles/aliases.sh` | Shell aliases (bash + zsh, sourced dari `.bashrc`/`.zshrc`) |
+| `dotfiles/starship.toml` | Prompt (Starship — install manual lewat `bootstrap/setup`) |
 
 ---
 
@@ -181,66 +125,37 @@ ndw restore --cloud
 
 | Script | Description |
 |---|---|
-| `bash bootstrap/setup` | Install semua tools (fresh install) |
-| `bash bootstrap/install` | Install NDW CLI + dotfiles |
+| `bash bootstrap/install` | Install NDW CLI + dotfiles (wajib, sekali per device) |
+| `bash bootstrap/setup` | Install tools opsional (Node, PHP, Python, dll) |
 | `bash bootstrap/upgrade` | Update NDW ke versi terbaru |
 | `bash bootstrap/uninstall` | Hapus NDW |
 
 ---
 
-## Backup & Restore
-
-### Database
-
-```bash
-# Backup harian
-ndw backup --cloud
-
-# Restore di PC baru
-ndw restore --cloud
-```
-
-Backup disimpan di:
-- Lokal: `~/backup/ndw/` (5 backup terakhir)
-- Cloud: Google Drive `NDW/backups/`
-
-### SSH Keys
+## Backup & Restore (SSH Keys)
 
 ```bash
 # Backup SSH keys (terenkripsi)
 ndw backup --ssh
 
-# Restore SSH keys di PC baru
+# Restore SSH keys di device baru
 ndw restore --ssh
 ```
 
-SSH keys disimpan di:
-- Cloud: Google Drive `NDW/ssh/` (terenkripsi dengan password)
+SSH keys disimpan di Google Drive: `NDW/ssh/` (terenkripsi dengan password yang kamu tentukan sendiri).
 
 > ⚠️ Ingat password enkripsi SSH — tidak bisa dipulihkan jika lupa.
 
+Database/service lokal (Postgres, Redis, dll) sengaja tidak ada di NDW — project di sini connect langsung ke Supabase (Postgres) dan Upstash (Redis), jadi tidak ada yang perlu di-backup secara lokal.
+
 ---
 
-## SSH Config
+## Terminal Setup (Warp)
 
-Repo ini menggunakan custom SSH host aliases:
+NDW tidak butuh zsh atau Powerlevel10k. Autosuggestion & syntax highlighting sudah bawaan Warp; alias & prompt di-handle lewat `dotfiles/aliases.sh` dan `dotfiles/starship.toml` di atas — keduanya jalan sama persis di Git Bash (Windows) maupun Terminal (macOS).
 
-| Alias | Host | Key |
-|---|---|---|
-| `github-nalfin` | github.com | `~/.ssh/id_ed25519_nalfin` |
-| `github-evocavedigital` | github.com | `~/.ssh/id_ed25519_evocavedigital` |
-| `evocave` | evocave.com | `~/.ssh/id_rsa_evocave_server` |
-
-Test koneksi:
-```bash
-ssh -T git@github-nalfin
-ssh -T git@github-evocavedigital
-```
-
-Clone repo menggunakan alias:
-```bash
-git clone git@github-nalfin:nalfin/<repo>.git
-```
+Opsional: arahkan VS Code untuk buka Warp lewat shortcut —
+Settings → cari `terminal.external.windowsExec` → isi `%LOCALAPPDATA%\Programs\Warp\warp.exe`, lalu `Ctrl+Shift+C` di VS Code akan buka window Warp baru.
 
 ---
 
@@ -250,25 +165,20 @@ git clone git@github-nalfin:nalfin/<repo>.git
 nalfin-developer-workstation/
 ├── bin/ndw                   # CLI entry point
 ├── bootstrap/
-│   ├── setup                 # Install semua tools
-│   ├── install               # Install NDW CLI
-│   ├── dotfiles              # Install dotfiles symlinks
-│   ├── generate-env          # Generate infra/.env dari config
-│   ├── uninstall             # Hapus NDW
-│   └── upgrade               # Update NDW
+│   ├── install                # Install NDW CLI + dotfiles (wajib)
+│   ├── setup                  # Install tools opsional (Node/PHP/Python/dll)
+│   ├── dotfiles                # Install dotfiles symlinks
+│   ├── uninstall               # Hapus NDW
+│   └── upgrade                 # Update NDW
 ├── cli/
-│   ├── app.sh                # Load libs + delegate ke router
-│   ├── router.sh             # Command dispatcher
-│   ├── commands/             # Satu file per command
-│   └── lib/                  # Shared libraries
+│   ├── app.sh                 # Load libs + delegate ke router
+│   ├── router.sh               # Command dispatcher
+│   ├── commands/                # bootstrap, doctor, backup, restore, help, version
+│   └── lib/                     # Shared libraries (output, config, common, yaml)
 ├── config/
-│   ├── workspace.yaml        # Folder struktur
-│   └── services.yaml         # Services config
-├── dotfiles/
-│   ├── zshrc                 # Zsh config
-│   ├── gitconfig             # Git config
-│   └── p10k.zsh              # Powerlevel10k config
-└── infra/
-    ├── docker-compose.yml    # Docker services
-    └── .env                  # Generated dari services.yaml
+│   └── workspace.yaml          # Folder struktur
+└── dotfiles/
+    ├── gitconfig                # Git config
+    ├── aliases.sh                # Shell aliases (bash + zsh)
+    └── starship.toml             # Prompt config
 ```

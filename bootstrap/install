@@ -12,6 +12,7 @@ NDW_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 export NDW_ROOT
 
 source "$NDW_ROOT/cli/lib/output.sh"
+source "$NDW_ROOT/cli/lib/common.sh"
 
 INSTALL_BIN="$HOME/.local/bin"
 INSTALL_SYMLINK="$INSTALL_BIN/ndw"
@@ -23,6 +24,10 @@ main() {
   _create_dirs
   _install_symlink
   _check_path
+
+  output_info "Installing dotfiles..."
+  bash "$NDW_ROOT/bootstrap/dotfiles"
+
   _done
 }
 
@@ -39,9 +44,18 @@ _install_symlink() {
   [[ -L "$INSTALL_SYMLINK" ]] && rm "$INSTALL_SYMLINK"
 
   chmod +x "$NDW_ROOT/bin/ndw"
-  ln -s "$NDW_ROOT/bin/ndw" "$INSTALL_SYMLINK"
 
-  output_success "Symlink created: $INSTALL_SYMLINK → $NDW_ROOT/bin/ndw"
+  if ln -s "$NDW_ROOT/bin/ndw" "$INSTALL_SYMLINK" 2>/dev/null; then
+    output_success "Symlink created: $INSTALL_SYMLINK → $NDW_ROOT/bin/ndw"
+  else
+    cat > "$INSTALL_SYMLINK" << EOF
+#!/usr/bin/env bash
+exec bash "$NDW_ROOT/bin/ndw" "\$@"
+EOF
+    chmod +x "$INSTALL_SYMLINK"
+    output_warning "Symlink failed — wrote a wrapper script instead: $INSTALL_SYMLINK"
+    output_dim     "Enable Developer Mode on Windows for real symlinks (Settings → For developers)."
+  fi
 }
 
 _check_path() {
@@ -50,15 +64,18 @@ _check_path() {
   if echo "$PATH" | grep -q "$INSTALL_BIN"; then
     output_success "$INSTALL_BIN is already in PATH"
   else
+    local rc="$HOME/.bashrc"
+    is_macos && rc="$HOME/.zshrc"
+
     output_warning "$INSTALL_BIN is not in your PATH yet"
     output_blank
-    echo '    Add this to your ~/.zshrc:'
+    echo "    Add this to your $rc:"
     echo ""
     echo '      export PATH="$HOME/.local/bin:$PATH"'
     echo ""
-    echo '    Then reload:'
+    echo "    Then reload:"
     echo ""
-    echo '      source ~/.zshrc'
+    echo "      source $rc"
     echo ""
   fi
 }
@@ -66,18 +83,9 @@ _check_path() {
 _done() {
   output_blank
   output_success "NDW installed! Run: ndw --help"
+  output_dim     "New device? Run 'ndw restore --ssh' first if you haven't."
+  output_dim     "Want Node/PHP/Python/etc too? Run 'bash bootstrap/setup' (optional)."
   output_blank
 }
 
 main "$@"
-
-# Install dotfiles
-output_info "Installing dotfiles..."
-bash "$NDW_ROOT/bootstrap/dotfiles"
-
-# Remind user to run setup if needed
-if ! command -v zsh &>/dev/null || ! command -v node &>/dev/null; then
-  output_blank
-  output_warning "Some tools are missing."
-  output_info    "Run 'bash bootstrap/setup' to install all required tools."
-fi
