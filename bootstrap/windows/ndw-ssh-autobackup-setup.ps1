@@ -12,7 +12,7 @@
 #      account on this machine can decrypt it).
 #   2. Registers a Scheduled Task that runs at every login, and every
 #      hour while logged in, checking whether ~/.ssh changed since the
-#      last backup — only backing up when it actually did.
+#      last backup - only backing up when it actually did.
 # =============================================================================
 
 $ErrorActionPreference = "Stop"

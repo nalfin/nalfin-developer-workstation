@@ -30,19 +30,23 @@ function Write-Log($msg) {
 }
 
 try {
+    [Console]::WriteLine("Checkpoint 1: entered try block")
     Write-Log "Check started."
+    [Console]::WriteLine("Checkpoint 2: logged start")
 
     if (-not (Test-Path $secretPath)) {
-        Write-Log "No stored password found at $secretPath — run ndw-ssh-autobackup-setup.ps1 first. Skipping."
+        Write-Log "No stored password found at $secretPath - run ndw-ssh-autobackup-setup.ps1 first. Skipping."
         exit 0
     }
+    [Console]::WriteLine("Checkpoint 3: secret exists")
 
     if (-not (Test-Path $sshPath)) {
         Write-Log "No ~/.ssh directory found at $sshPath. Skipping."
         exit 0
     }
+    [Console]::WriteLine("Checkpoint 4: ssh dir exists")
 
-    # Hash based on file paths + sizes + mtimes — cheap, no need to read file contents.
+    # Hash based on file paths + sizes + mtimes - cheap, no need to read file contents.
     $files = Get-ChildItem -Path $sshPath -Recurse -File -ErrorAction Stop
     $manifest = ($files | Sort-Object FullName | ForEach-Object {
         "$($_.FullName)|$($_.Length)|$($_.LastWriteTimeUtc.Ticks)"
@@ -58,13 +62,14 @@ try {
     }
 
     Write-Log "Files in ~/.ssh: $($files.Count). Current hash: $currentHash. Last hash: $lastHash"
+    [Console]::WriteLine("Checkpoint 5: hash computed")
 
     if ($currentHash -eq $lastHash) {
         Write-Log "No change detected. Nothing to do."
         exit 0
     }
 
-    Write-Log "Change detected in ~/.ssh — running backup..."
+    Write-Log "Change detected in ~/.ssh - running backup..."
 
     # Locate bash.exe (Git for Windows)
     $bashCandidates = @(
@@ -101,11 +106,14 @@ try {
         $currentHash | Out-File -FilePath $hashPath -Encoding utf8 -NoNewline
         Write-Log "Backup succeeded, hash updated."
     } else {
-        Write-Log "Backup FAILED (exit $exitCode) — hash not updated, will retry next check."
+        Write-Log "Backup FAILED (exit $exitCode) - hash not updated, will retry next check."
     }
 } catch {
-    Write-Log "UNEXPECTED ERROR: $_"
-    Write-Log ($_.ScriptStackTrace | Out-String)
+    [Console]::WriteLine("UNEXPECTED ERROR: " + $_.Exception.Message)
+    [Console]::WriteLine($_.ScriptStackTrace)
+    try {
+        Add-Content -Path $logPath -Value ("$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  UNEXPECTED ERROR: " + $_.Exception.Message) -Encoding utf8
+    } catch {}
     exit 1
 } finally {
     Stop-Transcript | Out-Null
