@@ -6,6 +6,7 @@
 
 NDW_BACKUP_DIR="$HOME/backup/ndw"
 NDW_GDRIVE_SSH_DIR="gdrive:NDW/ssh"
+NDW_BACKUP_KEEP=10   # how many backups to keep on Google Drive; older ones auto-deleted
 
 cmd_backup() {
   local ssh=false
@@ -96,10 +97,40 @@ _backup_ssh() {
 
   rm -f "$filepath"
 
+  _cleanup_old_backups "$auto"
+
   output_blank
   output_success "SSH keys backed up to Google Drive: $NDW_GDRIVE_SSH_DIR/$filename"
   if [[ "$auto" != true ]]; then
     output_warning "Remember your encryption password — it cannot be recovered!"
   fi
   output_blank
+}
+
+# Keeps only the newest $NDW_BACKUP_KEEP backups on Google Drive, deletes the rest.
+# Sorting by filename works because timestamps are zero-padded ISO-ish
+# (ssh_YYYY-MM-DD_HH-MM-SS.*), so lexical sort == chronological sort,
+# for both the current .tar.enc format and legacy .zip backups.
+_cleanup_old_backups() {
+  local auto="$1"
+  local files
+  files="$(rclone lsf "$NDW_GDRIVE_SSH_DIR" --include "*.zip" --include "*.tar.enc" 2>/dev/null | sort -r)"
+
+  [[ -z "$files" ]] && return
+
+  local count=0
+  local removed=0
+  while IFS= read -r f; do
+    [[ -z "$f" ]] && continue
+    count=$((count + 1))
+    if (( count > NDW_BACKUP_KEEP )); then
+      rclone delete "$NDW_GDRIVE_SSH_DIR/$f" 2>/dev/null
+      removed=$((removed + 1))
+      [[ "$auto" != true ]] && output_dim "Removed old backup: $f"
+    fi
+  done <<< "$files"
+
+  if (( removed > 0 )) && [[ "$auto" != true ]]; then
+    output_info "Cleaned up $removed old backup(s), keeping the newest $NDW_BACKUP_KEEP"
+  fi
 }

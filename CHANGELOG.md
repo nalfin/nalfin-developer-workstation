@@ -19,6 +19,7 @@ Format: [Semantic Versioning](https://semver.org)
 - Added `ndw setup`, `ndw upgrade`, `ndw uninstall` — forward to the matching `bootstrap/*` script so they work from any directory, not just inside the repo.
 - `backup --ssh` / `restore --ssh` switched from `zip -P` (weak ZipCrypto, and `zip` isn't preinstalled on Git Bash) to `tar` + `openssl enc -aes-256-cbc -pbkdf2` — no extra tools needed on Windows/macOS, and stronger encryption. New backups are `.tar.enc`; `restore --ssh` still reads old `.zip` backups for compatibility.
 - Added change-triggered auto-backup for Windows (`bootstrap/windows/ndw-ssh-autobackup-*.ps1`): a Scheduled Task checks a hash of `~/.ssh` at login + hourly and only runs `ndw backup --ssh --auto` when it actually changed. Password stored DPAPI-encrypted. `backup.sh` gained a `--auto` flag (reads password from `NDW_SSH_BACKUP_PASSWORD` env var, non-interactive) to support this.
+- `backup --ssh` now auto-deletes old backups on Google Drive, keeping only the newest `NDW_BACKUP_KEEP` (default 10) so storage doesn't grow unbounded and `restore --ssh` doesn't get a huge pick-list.
 
 ## [0.1.0] — Phase 1: Foundation
 

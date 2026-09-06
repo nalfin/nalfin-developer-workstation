@@ -170,6 +170,8 @@ ndw restore --ssh
 
 SSH keys disimpan di Google Drive: `NDW/ssh/` (terenkripsi dengan password yang kamu tentukan sendiri).
 
+Cuma **10 backup terbaru** yang disimpan — tiap backup baru otomatis hapus yang paling lama kalau udah lebih dari 10, jadi Drive nggak numpuk dan pas restore nggak bingung milih dari puluhan file. Ubah batasnya di `NDW_BACKUP_KEEP` (`cli/commands/backup.sh`) kalau mau beda.
+
 > ⚠️ Ingat password enkripsi SSH — tidak bisa dipulihkan jika lupa.
 
 Database/service lokal (Postgres, Redis, dll) sengaja tidak ada di NDW — project di sini connect langsung ke Supabase (Postgres) dan Upstash (Redis), jadi tidak ada yang perlu di-backup secara lokal.
