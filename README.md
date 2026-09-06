@@ -174,6 +174,28 @@ SSH keys disimpan di Google Drive: `NDW/ssh/` (terenkripsi dengan password yang 
 
 Database/service lokal (Postgres, Redis, dll) sengaja tidak ada di NDW — project di sini connect langsung ke Supabase (Postgres) dan Upstash (Redis), jadi tidak ada yang perlu di-backup secara lokal.
 
+### Auto Backup (Windows)
+
+Biar nggak lupa backup manual, ada opsi backup otomatis yang **cuma jalan kalau `~/.ssh` beneran berubah** (bukan jadwal buta) — dicek tiap login + tiap 1 jam, pakai Windows Scheduled Task (bukan proses yang nongkrong di RAM).
+
+Setup sekali (dari **PowerShell**, bukan Git Bash):
+```powershell
+powershell -ExecutionPolicy Bypass -File bootstrap/windows/ndw-ssh-autobackup-setup.ps1
+```
+Ini minta password enkripsi sekali, disimpan terenkripsi (DPAPI, cuma bisa dibuka akun Windows kamu di device ini).
+
+Cek log-nya:
+```powershell
+Get-Content "$env:USERPROFILE\.ndw\autobackup.log" -Tail 20
+```
+
+Matiin/hapus auto-backup:
+```powershell
+powershell -ExecutionPolicy Bypass -File bootstrap/windows/ndw-ssh-autobackup-remove.ps1
+```
+
+> macOS belum punya versi ini (butuh `launchd`, beda mekanisme dari Windows Scheduled Task) — nanti ditambahkan begitu ada device Mac aktif.
+
 ---
 
 ## Terminal Setup (Warp)

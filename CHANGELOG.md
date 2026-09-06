@@ -18,6 +18,7 @@ Format: [Semantic Versioning](https://semver.org)
 - Symlink steps (`ln -s`) now fall back to a copy/wrapper script if symlinks aren't permitted (e.g. Windows without Developer Mode).
 - Added `ndw setup`, `ndw upgrade`, `ndw uninstall` — forward to the matching `bootstrap/*` script so they work from any directory, not just inside the repo.
 - `backup --ssh` / `restore --ssh` switched from `zip -P` (weak ZipCrypto, and `zip` isn't preinstalled on Git Bash) to `tar` + `openssl enc -aes-256-cbc -pbkdf2` — no extra tools needed on Windows/macOS, and stronger encryption. New backups are `.tar.enc`; `restore --ssh` still reads old `.zip` backups for compatibility.
+- Added change-triggered auto-backup for Windows (`bootstrap/windows/ndw-ssh-autobackup-*.ps1`): a Scheduled Task checks a hash of `~/.ssh` at login + hourly and only runs `ndw backup --ssh --auto` when it actually changed. Password stored DPAPI-encrypted. `backup.sh` gained a `--auto` flag (reads password from `NDW_SSH_BACKUP_PASSWORD` env var, non-interactive) to support this.
 
 ## [0.1.0] — Phase 1: Foundation
 
