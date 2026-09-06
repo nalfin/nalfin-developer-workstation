@@ -65,10 +65,10 @@ _ndw_has lazygit && alias lg='lazygit'
 # Modern CLI replacements (only if installed)
 # ---------------------------------------------------------------------------
 if _ndw_has eza; then
-  alias ls='eza --icons'
-  alias ll='eza -lah --icons --group-directories-first'
-  alias la='eza -a --icons'
-  alias tree='eza --tree --icons'
+  alias ls='eza --icons=auto'
+  alias ll='eza -lah --icons=auto --group-directories-first'
+  alias la='eza -a --icons=auto'
+  alias tree='eza --tree --icons=auto'
 fi
 
 _ndw_has bat  && alias cat='bat'
