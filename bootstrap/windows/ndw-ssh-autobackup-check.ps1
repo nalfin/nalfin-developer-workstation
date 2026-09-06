@@ -14,6 +14,10 @@ $secretPath = Join-Path $ndwDir "ssh-backup.secret"
 $hashPath = Join-Path $ndwDir "ssh-last-hash.txt"
 $sshPath = Join-Path $env:USERPROFILE ".ssh"
 $logPath = Join-Path $ndwDir "autobackup.log"
+$transcriptPath = Join-Path $ndwDir "transcript.log"
+
+New-Item -ItemType Directory -Force -Path $ndwDir | Out-Null
+Start-Transcript -Path $transcriptPath -Append | Out-Null
 
 function Write-Log($msg) {
     $line = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  $msg"
@@ -26,8 +30,6 @@ function Write-Log($msg) {
 }
 
 try {
-    New-Item -ItemType Directory -Force -Path $ndwDir | Out-Null
-
     Write-Log "Check started."
 
     if (-not (Test-Path $secretPath)) {
@@ -105,4 +107,6 @@ try {
     Write-Log "UNEXPECTED ERROR: $_"
     Write-Log ($_.ScriptStackTrace | Out-String)
     exit 1
+} finally {
+    Stop-Transcript | Out-Null
 }
