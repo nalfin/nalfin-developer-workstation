@@ -85,6 +85,11 @@ try {
     }
     Write-Log "Using bash: $bash"
 
+    # Bash/Git Bash outputs UTF-8 (box-drawing chars, checkmarks, etc. from
+    # ndw's colored output). Without this, PowerShell misreads those bytes
+    # using the system codepage and garbles them in the log.
+    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
     # Decrypt the stored password just long enough to pass it to bash.
     $encrypted = Get-Content $secretPath -Raw
     $secureString = ConvertTo-SecureString $encrypted
