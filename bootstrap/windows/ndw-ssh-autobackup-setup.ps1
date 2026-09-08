@@ -54,10 +54,10 @@ $hashPath = Join-Path $ndwDir "ssh-last-hash.txt"
 if (Test-Path $hashPath) { Remove-Item $hashPath }
 
 $ndwRoot = (Get-Item $PSScriptRoot).Parent.Parent.FullName
-$checkScript = Join-Path $PSScriptRoot "ndw-ssh-autobackup-check.ps1"
+$launcherScript = Join-Path $PSScriptRoot "ndw-ssh-autobackup-launcher.vbs"
 
-$action = New-ScheduledTaskAction -Execute "powershell.exe" `
-    -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$checkScript`""
+$action = New-ScheduledTaskAction -Execute "wscript.exe" `
+    -Argument "//B `"$launcherScript`""
 
 $triggerLogon = New-ScheduledTaskTrigger -AtLogOn
 $triggerHourly = New-ScheduledTaskTrigger -Once -At (Get-Date) `
